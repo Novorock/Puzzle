@@ -1,3 +1,6 @@
+from pyglet.graphics import Batch, OrderedGroup
+
+
 class Field:
     def __init__(self, scheme: dict):
         self._matrix = [
@@ -46,3 +49,27 @@ class Field:
 
     def get_tile_kind(self, col: int, row: int):
         return self._matrix[row][col]
+
+
+class Canvas:
+    def __init__(self):
+        self._drawable_objects = []
+        self._batch = Batch()
+        self._background = OrderedGroup(0)
+        self._foreground = OrderedGroup(1)
+
+    def add_drawable(self, drawable, background=False):
+        drawable.batch = self._batch
+
+        if background:
+            drawable.group = self._background
+        else:
+            drawable.group = self._foreground
+
+        self._drawable_objects.append(drawable)
+
+    def contains(self, drawable):
+        return drawable in self._drawable_objects
+
+    def draw(self):
+        self._batch.draw()

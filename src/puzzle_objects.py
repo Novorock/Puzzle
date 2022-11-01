@@ -1,24 +1,10 @@
 from pyglet.sprite import Sprite
-from util import get_py_y_value, load_sprite
-from util import offset_x, offset_y
-from field import Field
-
-GROUND_TILE = load_sprite('ground_06.png')
-BLOCK_TILE = load_sprite('block.png', rescale=True)
-BLOCK_RED = load_sprite('block_red_signature.png')
-BLOCK_GREEN = load_sprite('block_green_signature.png')
-BLOCK_BLUE = load_sprite('block_blue_signature.png')
-RED_PIECE = load_sprite('pieces/red_piece.png')
-GREEN_PIECE = load_sprite('pieces/green_piece.png')
-BLUE_PIECE = load_sprite('pieces/blue_piece.png')
-SELECTION = load_sprite('selection.png')
-RED_PIECE_SELECTED = load_sprite('pieces/red_piece_selected.png')
-GREEN_PIECE_SELECTED = load_sprite('pieces/green_piece_selected.png')
-BLUE_PIECE_SELECTED = load_sprite('pieces/blue_piece_selected.png')
-
-MOVEMENT_SPEED = 200
-GROUND, BLOCK, RED_SIGN, GREEN_SIGN, BLUE_SIGN = 0, 10, 11, 12, 13
-KIND_1, KIND_2, KIND_3 = 21, 22, 23
+from copy import copy
+from util import get_py_y_value, offset_x, offset_y
+from util import MOVEMENT_SPEED, RED_PIECE, GREEN_PIECE
+from util import BLUE_PIECE, RED_PIECE_SELECTED, BLUE_PIECE_SELECTED, GREEN_PIECE_SELECTED, SELECTION
+from util import GROUND, KIND_1, KIND_2, KIND_3
+from field import Field, Canvas
 
 
 class MovementAnimation:
@@ -66,12 +52,11 @@ class MovementAnimation:
             if self.is_next_tile(self._dx, self._x, self._col):
                 self._x = offset_x + self._col * 64
                 self._dx = 0
+                self._is_moving = False
             elif self.is_next_tile(self._dy, self._y, self._row):
                 self._y = offset_y + self._row * 64
                 self._dy = 0
-
-        if self._dy == 0 and self._dx == 0:
-            self._is_moving = False
+                self._is_moving = False
 
     def is_moving(self):
         return self._is_moving
@@ -84,12 +69,20 @@ class MovementAnimation:
 
 
 class Piece(MovementAnimation):
-    def __init__(self, sprite: Sprite, on_selection_sprite: Sprite, kind: int, col, row, field: Field):
+    def __init__(self, sprite: Sprite, on_selection_sprite: Sprite, kind: int, col, row, field: Field, canvas: Canvas):
         self._sprite = sprite
         self._kind = kind
         self._on_selection = False
         self._on_selection_sprite = on_selection_sprite
+        self._current_sprite = self._sprite
         self._field = field
+
+        if not canvas.contains(self._sprite):
+            canvas.add_drawable(self._sprite)
+
+        if not canvas.contains(self._on_selection_sprite):
+            canvas.add_drawable(self._on_selection_sprite)
+
         super().__init__(col, row)
 
     def move_down(self):
@@ -118,35 +111,34 @@ class Piece(MovementAnimation):
 
     def update(self, dt):
         super().update(dt)
+        self._current_sprite.update(self._x, get_py_y_value(self._y))
 
     def set_selection(self, value: bool):
-        self._on_selection = value
-
-    def draw(self):
-        if not self._on_selection:
-            self._sprite.update(self._x, get_py_y_value(self._y))
-            self._sprite.draw()
+        if value:
+            self._current_sprite = self._on_selection_sprite
         else:
-            self._on_selection_sprite.update(self._x, get_py_y_value(self._y))
-            self._on_selection_sprite.draw()
+            self._current_sprite = self._sprite
+
+    def get_current_sprite(self):
+        return self._current_sprite
 
     def __str__(self):
         return "<Piece col='%s' row='%s' x='%s' y='%s'>" % (self._col, self._row, self._x, self._y)
 
 
 class RedPiece(Piece):
-    def __init__(self, col, row, field):
-        super().__init__(RED_PIECE, RED_PIECE_SELECTED, KIND_1, col, row, field)
+    def __init__(self, col, row, field, canvas):
+        super().__init__(copy(RED_PIECE), copy(RED_PIECE_SELECTED), KIND_1, col, row, field, canvas)
 
 
 class GreenPiece(Piece):
-    def __init__(self, col, row, field):
-        super().__init__(GREEN_PIECE, GREEN_PIECE_SELECTED, KIND_2, col, row, field)
+    def __init__(self, col, row, field, canvas):
+        super().__init__(copy(GREEN_PIECE), copy(GREEN_PIECE_SELECTED), KIND_2, col, row, field, canvas)
 
 
 class BluePiece(Piece):
-    def __init__(self, col, row, field):
-        super().__init__(BLUE_PIECE, BLUE_PIECE_SELECTED, KIND_3, col, row, field)
+    def __init__(self, col, row, field, canvas):
+        super().__init__(copy(BLUE_PIECE), copy(BLUE_PIECE_SELECTED), KIND_3, col, row, field, canvas)
 
 
 class PieceFactory:
@@ -154,23 +146,27 @@ class PieceFactory:
         pass
 
     @staticmethod
-    def new_instance(kind, col, row, field: Field):
+    def new_instance(kind, col, row, field: Field, canvas: Canvas):
         if kind == KIND_1:
-            return RedPiece(col, row, field)
-
-        if kind == KIND_2:
-            return GreenPiece(col, row, field)
-
-        if kind == KIND_3:
-            return BluePiece(col, row, field)
+            return RedPiece(col, row, field, canvas)
+        elif kind == KIND_2:
+            return GreenPiece(col, row, field, canvas)
+        elif kind == KIND_3:
+            return BluePiece(col, row, field, canvas)
+        else:
+            raise AttributeError("Invalid kind of piece")
 
 
 class Selection(MovementAnimation):
     def __init__(self, col, row):
-        self._sprite = SELECTION
+        self._sprite = copy(SELECTION)
         self._current_piece = None
         self._active = False
         super().__init__(col, row)
+
+    def add_to_canvas(self, canvas: Canvas):
+        if not canvas.contains(self._sprite):
+            canvas.add_drawable(self._sprite)
 
     def move_down(self):
         if self._active:
@@ -206,6 +202,7 @@ class Selection(MovementAnimation):
 
         if not self._active:
             super().update(dt)
+            self._sprite.update(self._x, get_py_y_value(self._y))
 
     def select(self, piece: Piece):
         self._current_piece = piece
@@ -229,8 +226,3 @@ class Selection(MovementAnimation):
 
     def is_active(self):
         return self._active
-
-    def draw(self):
-        if not self._active:
-            self._sprite.update(self._x, get_py_y_value(self._y))
-            self._sprite.draw()
