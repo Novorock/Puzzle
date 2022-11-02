@@ -1,5 +1,5 @@
+from pyglet.image import ImageData
 from pyglet.sprite import Sprite
-from copy import copy
 from util import get_py_y_value, offset_x, offset_y
 from util import MOVEMENT_SPEED, RED_PIECE, GREEN_PIECE
 from util import BLUE_PIECE, RED_PIECE_SELECTED, BLUE_PIECE_SELECTED, GREEN_PIECE_SELECTED, SELECTION
@@ -69,82 +69,74 @@ class MovementAnimation:
 
 
 class Piece(MovementAnimation):
-    def __init__(self, sprite: Sprite, on_selection_sprite: Sprite, kind: int, col, row, field: Field):
-        super().__init__(col, row)
-        self._sprite = sprite
-        self._sprite.update(self._x, self._y)
+    def __init__(self, dft_img: ImageData, slt_img: ImageData, canvas: Canvas, kind: int, col, row, field: Field):
+        super(Piece, self).__init__(col, row)
         self._kind = kind
-        self._on_selection = False
-        self._on_selection_sprite = on_selection_sprite
-        self._current_sprite = self._sprite
         self._field = field
+        self._dft_img, self._slt_img = dft_img, slt_img
+        self._current_sprite = canvas.get_sprite(dft_img)
+        self._current_sprite.update(self._x, get_py_y_value(self._y))
+        self._canvas = canvas
 
     def move_down(self):
         if not self._field.is_blocked(self._col, self._row + 1) and not self._is_moving:
-            super().move_down()
+            super(Piece, self).move_down()
             self._field.update_field(self._col, self._row - 1, GROUND)
             self._field.update_field(self._col, self._row, self._kind)
 
     def move_up(self):
         if not self._field.is_blocked(self._col, self._row - 1) and not self._is_moving:
-            super().move_up()
+            super(Piece, self).move_up()
             self._field.update_field(self._col, self._row + 1, GROUND)
             self._field.update_field(self._col, self._row, self._kind)
 
     def move_right(self):
         if not self._field.is_blocked(self._col + 1, self._row) and not self._is_moving:
-            super().move_right()
+            super(Piece, self).move_right()
             self._field.update_field(self._col - 1, self._row, GROUND)
             self._field.update_field(self._col, self._row, self._kind)
 
     def move_left(self):
         if not self._field.is_blocked(self._col - 1, self._row) and not self._is_moving:
-            super().move_left()
+            super(Piece, self).move_left()
             self._field.update_field(self._col + 1, self._row, GROUND)
             self._field.update_field(self._col, self._row, self._kind)
 
     def update(self, dt):
-        super().update(dt)
+        super(Piece, self).update(dt)
         self._current_sprite.update(self._x, get_py_y_value(self._y))
 
-    def set_selection(self, value: bool):
-        if value:
-            self._current_sprite = self._on_selection_sprite
-        else:
-            self._current_sprite = self._sprite
+    def on_select(self):
+        self._canvas.delete_sprite(self._current_sprite)
+        self._current_sprite = self._canvas.get_sprite(self._slt_img)
+        self._current_sprite.update(self._x, get_py_y_value(self._y))
+
+    def on_drop(self):
+        self._canvas.delete_sprite(self._current_sprite)
+        self._current_sprite = self._canvas.get_sprite(self._dft_img)
+        self._current_sprite.update(self._x, get_py_y_value(self._y))
 
     def get_current_sprite(self):
         return self._current_sprite
 
-    def __str__(self):
-        return "<Piece col='%s' row='%s' x='%s' y='%s'>" % (self._col, self._row, self._x, self._y)
+
+def __str__(self):
+    return "<Piece col='%s' row='%s' x='%s' y='%s'>" % (self._col, self._row, self._x, self._y)
 
 
 class RedPiece(Piece):
-    def __init__(self, col, row, field, canvas):
-        sprite = Sprite(img=RED_PIECE, batch=canvas.get_batch(), group=canvas.get_foreground())
-        on_selection_sprite = Sprite(img=RED_PIECE_SELECTED, batch=canvas.get_batch(), group=canvas.get_foreground())
-        canvas.put(sprite)
-        canvas.put(on_selection_sprite)
-        super().__init__(sprite, on_selection_sprite, KIND_1, col, row, field)
+    def __init__(self, canvas: Canvas, col, row, field):
+        super().__init__(RED_PIECE, RED_PIECE_SELECTED, canvas, KIND_1, col, row, field)
 
 
 class GreenPiece(Piece):
-    def __init__(self, col, row, field, canvas):
-        sprite = Sprite(img=GREEN_PIECE, batch=canvas.get_batch(), group=canvas.get_foreground())
-        on_selection_sprite = Sprite(img=GREEN_PIECE_SELECTED, batch=canvas.get_batch(), group=canvas.get_foreground())
-        canvas.put(sprite)
-        canvas.put(on_selection_sprite)
-        super().__init__(sprite, on_selection_sprite, KIND_2, col, row, field)
+    def __init__(self, canvas: Canvas, col, row, field):
+        super().__init__(GREEN_PIECE, GREEN_PIECE_SELECTED, canvas, KIND_1, col, row, field)
 
 
 class BluePiece(Piece):
-    def __init__(self, col, row, field, canvas):
-        sprite = Sprite(img=BLUE_PIECE, batch=canvas.get_batch(), group=canvas.get_foreground())
-        on_selection_sprite = Sprite(img=BLUE_PIECE_SELECTED, batch=canvas.get_batch(), group=canvas.get_foreground())
-        canvas.put(sprite)
-        canvas.put(on_selection_sprite)
-        super().__init__(sprite, on_selection_sprite, KIND_3, col, row, field)
+    def __init__(self, canvas: Canvas, col, row, field):
+        super().__init__(BLUE_PIECE, BLUE_PIECE_SELECTED, canvas, KIND_1, col, row, field)
 
 
 class PieceFactory:
@@ -154,22 +146,24 @@ class PieceFactory:
     @staticmethod
     def new_instance(kind, col, row, field: Field, canvas: Canvas):
         if kind == KIND_1:
-            return RedPiece(col, row, field, canvas)
+            return RedPiece(canvas, col, row, field)
         elif kind == KIND_2:
-            return GreenPiece(col, row, field, canvas)
+            return GreenPiece(canvas, col, row, field)
         elif kind == KIND_3:
-            return BluePiece(col, row, field, canvas)
+            return BluePiece(canvas, col, row, field)
         else:
             raise AttributeError("Invalid kind of piece")
 
 
 class Selection(MovementAnimation):
     def __init__(self, col, row, canvas: Canvas):
-        self._sprite = Sprite(img=SELECTION, batch=canvas.get_batch(), group=canvas.get_foreground())
-        canvas.put(self._sprite)
+        super().__init__(col, row)
         self._current_piece = None
         self._active = False
-        super().__init__(col, row)
+        self._canvas = canvas
+        self._dft_img = SELECTION
+        self._sprite = canvas.get_sprite(SELECTION)
+        self._sprite.update(self._x, get_py_y_value(self._y))
 
     def move_down(self):
         if self._active:
@@ -205,11 +199,13 @@ class Selection(MovementAnimation):
 
         if not self._active:
             super().update(dt)
-            self._sprite.update(self._x, get_py_y_value(self._y))
+            if self._sprite is not None:
+                self._sprite.update(self._x, get_py_y_value(self._y))
 
     def select(self, piece: Piece):
+        self._canvas.delete_sprite(self._sprite)
         self._current_piece = piece
-        self._current_piece.set_selection(True)
+        self._current_piece.on_select()
         self._active = True
 
     def drop(self):
@@ -217,8 +213,9 @@ class Selection(MovementAnimation):
         self._row = self._current_piece.get_row()
         self._x = offset_x + self._col * 64
         self._y = offset_y + self._row * 64
-        self._current_piece.set_selection(False)
+        self._current_piece.on_drop()
         self._current_piece = None
+        self._sprite = self._canvas.get_sprite(self._dft_img)
         self._active = False
 
     def is_moving(self):

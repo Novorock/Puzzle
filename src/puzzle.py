@@ -1,9 +1,9 @@
 from pyglet.window import key
 from pyglet.text import Label
+from puzzle_objects import PieceFactory, Selection
 from util import GROUND_TILE, BLOCK_TILE
 from util import RED_SIGN, GREEN_SIGN, BLUE_SIGN, BLOCK, BLOCK_RED, BLOCK_GREEN, BLOCK_BLUE
 from util import KIND_1, KIND_2, KIND_3
-from puzzle_objects import PieceFactory, Selection
 from util import get_py_y_value, offset_x, offset_y
 from field import Field, Canvas
 
@@ -50,10 +50,13 @@ class Puzzle:
             self._selection.move_up()
 
         if symbol == key.ENTER:
-            col, row = self._selection.get_col(), self._selection.get_row()
-            result = list(filter(lambda piece: piece.get_col() == col and piece.get_row() == row, self._pieces))
-            if len(result) > 0:
-                self._selection.select(result[0])
+            if self._selection.is_active():
+                self._selection.drop()
+            else:
+                col, row = self._selection.get_col(), self._selection.get_row()
+                result = list(filter(lambda piece: piece.get_col() == col and piece.get_row() == row, self._pieces))
+                if len(result) > 0:
+                    self._selection.select(result[0])
 
     def draw(self):
         self._canvas.draw()

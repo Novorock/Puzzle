@@ -1,4 +1,6 @@
 from pyglet.graphics import Batch, OrderedGroup
+from pyglet.sprite import Sprite
+from pyglet.image import ImageData
 
 
 class Field:
@@ -58,18 +60,19 @@ class Canvas:
         self._background = OrderedGroup(0)
         self._foreground = OrderedGroup(1)
 
-    def put(self, drawable):
-        if drawable not in self._drawable_objects:
-            self._drawable_objects.append(drawable)
+    def get_sprite(self, img: ImageData, background=False):
+        if background:
+            sprite = Sprite(img=img, batch=self._batch, group=self._background)
+        else:
+            sprite = Sprite(img=img, batch=self._batch, group=self._foreground)
 
-    def get_batch(self):
-        return self._batch
+        self._drawable_objects.append(sprite)
 
-    def get_background(self):
-        return self._background
+        return sprite
 
-    def get_foreground(self):
-        return self._foreground
+    def delete_sprite(self, sprite: Sprite):
+        sprite.delete()
+        self._drawable_objects.remove(sprite)
 
     def draw(self):
         self._batch.draw()
