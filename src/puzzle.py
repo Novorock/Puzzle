@@ -34,13 +34,26 @@ class Puzzle:
         self._field = Field({'kind1': KIND_1, 'kind2': KIND_2, 'kind3': KIND_3})
         self._canvas = Canvas()
         self._pieces = PuzzleFactory(self._field, self._canvas).create_pieces()
+        self._selection = Selection(1, 4, self._canvas)
 
     def update(self, dt):
-        for piece in self._pieces:
-            piece.update(dt)
+        self._selection.update(dt)
 
     def on_key_press(self, symbol):
-        pass
+        if symbol == key.RIGHT:
+            self._selection.move_right()
+        elif symbol == key.LEFT:
+            self._selection.move_left()
+        elif symbol == key.DOWN:
+            self._selection.move_down()
+        elif symbol == key.UP:
+            self._selection.move_up()
+
+        if symbol == key.ENTER:
+            col, row = self._selection.get_col(), self._selection.get_row()
+            result = list(filter(lambda piece: piece.get_col() == col and piece.get_row() == row, self._pieces))
+            if len(result) > 0:
+                self._selection.select(result[0])
 
     def draw(self):
         self._canvas.draw()

@@ -69,21 +69,15 @@ class MovementAnimation:
 
 
 class Piece(MovementAnimation):
-    def __init__(self, sprite: Sprite, on_selection_sprite: Sprite, kind: int, col, row, field: Field, canvas: Canvas):
+    def __init__(self, sprite: Sprite, on_selection_sprite: Sprite, kind: int, col, row, field: Field):
+        super().__init__(col, row)
         self._sprite = sprite
+        self._sprite.update(self._x, self._y)
         self._kind = kind
         self._on_selection = False
         self._on_selection_sprite = on_selection_sprite
         self._current_sprite = self._sprite
         self._field = field
-
-        if not canvas.contains(self._sprite):
-            canvas.add_drawable(self._sprite)
-
-        if not canvas.contains(self._on_selection_sprite):
-            canvas.add_drawable(self._on_selection_sprite)
-
-        super().__init__(col, row)
 
     def move_down(self):
         if not self._field.is_blocked(self._col, self._row + 1) and not self._is_moving:
@@ -128,17 +122,29 @@ class Piece(MovementAnimation):
 
 class RedPiece(Piece):
     def __init__(self, col, row, field, canvas):
-        super().__init__(copy(RED_PIECE), copy(RED_PIECE_SELECTED), KIND_1, col, row, field, canvas)
+        sprite = Sprite(img=RED_PIECE, batch=canvas.get_batch(), group=canvas.get_foreground())
+        on_selection_sprite = Sprite(img=RED_PIECE_SELECTED, batch=canvas.get_batch(), group=canvas.get_foreground())
+        canvas.put(sprite)
+        canvas.put(on_selection_sprite)
+        super().__init__(sprite, on_selection_sprite, KIND_1, col, row, field)
 
 
 class GreenPiece(Piece):
     def __init__(self, col, row, field, canvas):
-        super().__init__(copy(GREEN_PIECE), copy(GREEN_PIECE_SELECTED), KIND_2, col, row, field, canvas)
+        sprite = Sprite(img=GREEN_PIECE, batch=canvas.get_batch(), group=canvas.get_foreground())
+        on_selection_sprite = Sprite(img=GREEN_PIECE_SELECTED, batch=canvas.get_batch(), group=canvas.get_foreground())
+        canvas.put(sprite)
+        canvas.put(on_selection_sprite)
+        super().__init__(sprite, on_selection_sprite, KIND_2, col, row, field)
 
 
 class BluePiece(Piece):
     def __init__(self, col, row, field, canvas):
-        super().__init__(copy(BLUE_PIECE), copy(BLUE_PIECE_SELECTED), KIND_3, col, row, field, canvas)
+        sprite = Sprite(img=BLUE_PIECE, batch=canvas.get_batch(), group=canvas.get_foreground())
+        on_selection_sprite = Sprite(img=BLUE_PIECE_SELECTED, batch=canvas.get_batch(), group=canvas.get_foreground())
+        canvas.put(sprite)
+        canvas.put(on_selection_sprite)
+        super().__init__(sprite, on_selection_sprite, KIND_3, col, row, field)
 
 
 class PieceFactory:
@@ -158,15 +164,12 @@ class PieceFactory:
 
 
 class Selection(MovementAnimation):
-    def __init__(self, col, row):
-        self._sprite = copy(SELECTION)
+    def __init__(self, col, row, canvas: Canvas):
+        self._sprite = Sprite(img=SELECTION, batch=canvas.get_batch(), group=canvas.get_foreground())
+        canvas.put(self._sprite)
         self._current_piece = None
         self._active = False
         super().__init__(col, row)
-
-    def add_to_canvas(self, canvas: Canvas):
-        if not canvas.contains(self._sprite):
-            canvas.add_drawable(self._sprite)
 
     def move_down(self):
         if self._active:

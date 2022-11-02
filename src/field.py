@@ -58,18 +58,18 @@ class Canvas:
         self._background = OrderedGroup(0)
         self._foreground = OrderedGroup(1)
 
-    def add_drawable(self, drawable, background=False):
-        drawable.batch = self._batch
+    def put(self, drawable):
+        if drawable not in self._drawable_objects:
+            self._drawable_objects.append(drawable)
 
-        if background:
-            drawable.group = self._background
-        else:
-            drawable.group = self._foreground
+    def get_batch(self):
+        return self._batch
 
-        self._drawable_objects.append(drawable)
+    def get_background(self):
+        return self._background
 
-    def contains(self, drawable):
-        return drawable in self._drawable_objects
+    def get_foreground(self):
+        return self._foreground
 
     def draw(self):
         self._batch.draw()
