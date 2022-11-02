@@ -1,5 +1,4 @@
 from pyglet.image import ImageData
-from pyglet.sprite import Sprite
 from util import get_py_y_value, offset_x, offset_y
 from util import MOVEMENT_SPEED, RED_PIECE, GREEN_PIECE
 from util import BLUE_PIECE, RED_PIECE_SELECTED, BLUE_PIECE_SELECTED, GREEN_PIECE_SELECTED, SELECTION
@@ -36,24 +35,16 @@ class MovementAnimation:
         self._dx = -MOVEMENT_SPEED
         self._is_moving = True
 
-    @classmethod
-    def is_next_tile(cls, dx, x, col):
-        if (dx > 0 and x > offset_x + col * 64) or (
-                dx < 0 and x < offset_x + col * 64):
-            return True
-
-        return False
-
     def update(self, dt):
         if self._is_moving:
             self._x += self._dx * dt
             self._y += self._dy * dt
 
-            if self.is_next_tile(self._dx, self._x, self._col):
+            if (offset_x + self._col * 64 - self._x) * self._dx < 0:
                 self._x = offset_x + self._col * 64
                 self._dx = 0
                 self._is_moving = False
-            elif self.is_next_tile(self._dy, self._y, self._row):
+            elif (offset_y + self._row * 64 - self._y) * self._dy < 0:
                 self._y = offset_y + self._row * 64
                 self._dy = 0
                 self._is_moving = False
