@@ -29,19 +29,6 @@ def load_sprite(path: str, rescale=False):
     return sprite
 
 
-# GROUND_TILE = load_sprite('ground_06.png')
-# BLOCK_TILE = load_sprite('block.png', rescale=True)
-# BLOCK_RED = load_sprite('block_red_signature.png')
-# BLOCK_GREEN = load_sprite('block_green_signature.png')
-# BLOCK_BLUE = load_sprite('block_blue_signature.png')
-# RED_PIECE = load_sprite('pieces/red_piece.png')
-# GREEN_PIECE = load_sprite('pieces/green_piece.png')
-# BLUE_PIECE = load_sprite('pieces/blue_piece.png')
-# SELECTION = load_sprite('selection.png')
-# RED_PIECE_SELECTED = load_sprite('pieces/red_piece_selected.png')
-# GREEN_PIECE_SELECTED = load_sprite('pieces/green_piece_selected.png')
-# BLUE_PIECE_SELECTED = load_sprite('pieces/blue_piece_selected.png')
-
 GROUND_TILE = resource.image('ground_06.png')
 BLOCK_TILE = resource.image('block.png')
 BLOCK_RED = resource.image('block_red_signature.png')

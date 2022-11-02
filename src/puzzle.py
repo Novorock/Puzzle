@@ -2,7 +2,7 @@ from pyglet.window import key
 from pyglet.text import Label
 from puzzle_objects import PieceFactory, Selection
 from util import GROUND_TILE, BLOCK_TILE
-from util import RED_SIGN, GREEN_SIGN, BLUE_SIGN, BLOCK, BLOCK_RED, BLOCK_GREEN, BLOCK_BLUE
+from util import GROUND, RED_SIGN, GREEN_SIGN, BLUE_SIGN, BLOCK, BLOCK_RED, BLOCK_GREEN, BLOCK_BLUE
 from util import KIND_1, KIND_2, KIND_3
 from util import get_py_y_value, offset_x, offset_y
 from field import Field, Canvas
@@ -28,12 +28,31 @@ class PuzzleFactory:
 
         return pieces
 
+    def build_environment(self):
+        for i in range(self._field_size):
+            for j in range(self._field_size):
+                x, y = offset_x + j * 64, get_py_y_value(offset_y + i * 64)
+                kind = self._field.get_tile_kind(j, i)
+
+                self._canvas.get_sprite(GROUND_TILE, background=True, x=x, y=y)
+
+                if kind == BLOCK:
+                    self._canvas.get_sprite(BLOCK_TILE, x=x, y=y)
+                elif kind == RED_SIGN:
+                    self._canvas.get_sprite(BLOCK_RED, x=x, y=y)
+                elif kind == GREEN_SIGN:
+                    self._canvas.get_sprite(BLOCK_GREEN, x=x, y=y)
+                elif kind == BLUE_SIGN:
+                    self._canvas.get_sprite(BLOCK_BLUE, x=x, y=y)
+
 
 class Puzzle:
     def __init__(self):
         self._field = Field({'kind1': KIND_1, 'kind2': KIND_2, 'kind3': KIND_3})
         self._canvas = Canvas()
-        self._pieces = PuzzleFactory(self._field, self._canvas).create_pieces()
+        self._factory = PuzzleFactory(self._field, self._canvas)
+        self._factory.build_environment()
+        self._pieces = self._factory.create_pieces()
         self._selection = Selection(1, 4, self._canvas)
 
     def update(self, dt):
@@ -50,7 +69,7 @@ class Puzzle:
             self._selection.move_up()
 
         if symbol == key.ENTER:
-            if self._selection.is_active():
+            if self._selection.is_active() and not self._selection.is_moving():
                 self._selection.drop()
             else:
                 col, row = self._selection.get_col(), self._selection.get_row()

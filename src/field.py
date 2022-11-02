@@ -60,11 +60,11 @@ class Canvas:
         self._background = OrderedGroup(0)
         self._foreground = OrderedGroup(1)
 
-    def get_sprite(self, img: ImageData, background=False):
+    def get_sprite(self, img: ImageData, *, x=0, y=0, background=False):
         if background:
-            sprite = Sprite(img=img, batch=self._batch, group=self._background)
+            sprite = Sprite(img=img, batch=self._batch, group=self._background, x=x, y=y)
         else:
-            sprite = Sprite(img=img, batch=self._batch, group=self._foreground)
+            sprite = Sprite(img=img, batch=self._batch, group=self._foreground, x=x, y=y)
 
         self._drawable_objects.append(sprite)
 
