@@ -3,7 +3,7 @@ from util import get_py_y_value, offset_x, offset_y
 from util import MOVEMENT_SPEED, RED_PIECE, GREEN_PIECE
 from util import BLUE_PIECE, RED_PIECE_SELECTED, BLUE_PIECE_SELECTED, GREEN_PIECE_SELECTED, SELECTION
 from util import EMPTY, FIRST_KIND, SECOND_KIND, THIRD_KIND
-from field import Field, Canvas
+from environment import Field, Canvas
 
 
 class MovementAnimation:

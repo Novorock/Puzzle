@@ -1,12 +1,16 @@
 from pyglet.image import ImageData
 from pyglet.sprite import Sprite
 from pyglet import resource
+from pyglet import font
 
 window_width, window_height = 576, 576
 offset_x, offset_y = 64, 64
 
 resource.path = ['../assets']
 resource.reindex()
+
+resource.add_font('small_pixel.ttf')
+SMALL_PIXEL = font.load('Small Pixel')
 
 
 def set_center(img: ImageData):
@@ -33,7 +37,7 @@ GROUND = []
 for i in range(8):
     GROUND.append(resource.image('ground_0%s.png' % i))
 
-BLOCK = resource.image('block_01.png')
+BLOCK = resource.image('block_02.png')
 RED_PIECE = resource.image('pieces/red_piece.png')
 GREEN_PIECE = resource.image('pieces/green_piece.png')
 BLUE_PIECE = resource.image('pieces/blue_piece.png')
