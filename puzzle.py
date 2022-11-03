@@ -2,8 +2,8 @@ from pyglet import app
 from pyglet import clock
 from pyglet.window import Window, FPSDisplay
 from pyglet import gl
-from environment import Canvas
-import states
+from src.environment import Canvas
+import src.states as states
 
 main_window = Window(576, 576)
 main_window.set_caption('Puzzle')

@@ -1,9 +1,9 @@
 from pyglet.image import ImageData
-from util import get_py_y_value, offset_x, offset_y
-from util import MOVEMENT_SPEED, RED_PIECE, GREEN_PIECE
-from util import BLUE_PIECE, RED_PIECE_SELECTED, BLUE_PIECE_SELECTED, GREEN_PIECE_SELECTED, SELECTION
-from util import EMPTY, FIRST_KIND, SECOND_KIND, THIRD_KIND
-from environment import Field, Canvas
+from src.util import get_py_y_value, offset_x, offset_y
+from src.util import MOVEMENT_SPEED, RED_PIECE, GREEN_PIECE
+from src.util import BLUE_PIECE, RED_PIECE_SELECTED, BLUE_PIECE_SELECTED, GREEN_PIECE_SELECTED, SELECTION
+from src.util import EMPTY, FIRST_KIND, SECOND_KIND, THIRD_KIND
+from src.environment import Field, Canvas
 
 
 class MovementAnimation:
@@ -153,7 +153,7 @@ class Selection(MovementAnimation):
         self._active = False
         self._canvas = canvas
         self._dft_img = SELECTION
-        self._sprite = canvas.get_sprite(SELECTION)
+        self._sprite = canvas.get_sprite(SELECTION, group=canvas.get_selection_layout())
         self._sprite.update(self._x, get_py_y_value(self._y))
 
     def move_down(self):
@@ -206,8 +206,11 @@ class Selection(MovementAnimation):
         self._y = offset_y + self._row * 64
         self._current_piece.on_drop()
         self._current_piece = None
-        self._sprite = self._canvas.get_sprite(self._dft_img)
+        self._sprite = self._canvas.get_sprite(self._dft_img, group=self._canvas.get_selection_layout())
         self._active = False
+
+    def get_sprite(self):
+        return self._sprite
 
     def is_moving(self):
         if self._current_piece is not None:

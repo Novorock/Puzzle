@@ -1,7 +1,7 @@
 from pyglet.graphics import Batch, OrderedGroup
 from pyglet.sprite import Sprite
 from pyglet.image import ImageData
-from util import BLOCKED
+from src.util import BLOCKED
 
 
 class Field:
@@ -18,11 +18,11 @@ class Field:
 
         self._matrix = [
             [10, 10, 10, 10, 10, 10, 10],
-            [10, 21, 10, 22, 10, 23, 10],
-            [10, 21, 21, 22, 22, 23, 10],
-            [10, 0, 10, 22, 10, 23, 10],
-            [10, 21, 0, 22, 0, 23, 10],
-            [10, 21, 10, 0, 10, 23, 10],
+            [10, 23, 10, 23, 10, 22, 10],
+            [10, 0, 21, 22, 22, 21, 10],
+            [10, 0, 10, 21, 10, 0, 10],
+            [10, 21, 23, 22, 0, 23, 10],
+            [10, 22, 10, 23, 10, 21, 10],
             [10, 10, 10, 10, 10, 10, 10]
         ]
 
@@ -73,12 +73,15 @@ class Canvas:
         self._batch = Batch()
         self._background = OrderedGroup(0)
         self._foreground = OrderedGroup(1)
-        self._curtain = OrderedGroup(2)
-        self._text_layout = OrderedGroup(3)
+        self._selection_layout = OrderedGroup(2)
+        self._curtain = OrderedGroup(3)
+        self._text_layout = OrderedGroup(4)
 
-    def get_sprite(self, img: ImageData, *, x=0, y=0, background=False):
+    def get_sprite(self, img: ImageData, *, x=0, y=0, background=False, group=None):
         if background:
             sprite = Sprite(img=img, batch=self._batch, group=self._background, x=x, y=y)
+        elif group is not None:
+            sprite = Sprite(img=img, batch=self._batch, group=group, x=x, y=y)
         else:
             sprite = Sprite(img=img, batch=self._batch, group=self._foreground, x=x, y=y)
 
@@ -87,12 +90,17 @@ class Canvas:
         return sprite
 
     def delete_sprite(self, sprite: Sprite):
-        if sprite is not None:
+        try:
             sprite.delete()
             self._drawable_objects.remove(sprite)
+        except Exception:
+            return
 
     def get_batch(self):
         return self._batch
+
+    def get_selection_layout(self):
+        return self._selection_layout
 
     def get_curtain(self):
         return self._curtain

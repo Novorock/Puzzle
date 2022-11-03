@@ -1,10 +1,10 @@
 from pyglet.shapes import Rectangle
 from pyglet.window import key
 from pyglet.text import Label
-from util import window_width, window_height, offset_x, offset_y, get_py_y_value
-from util import GROUND, BLOCK, FIRST_KIND, SECOND_KIND, THIRD_KIND
-from foundation import PieceFactory, Selection
-from environment import Field, Canvas
+from src.util import window_width, window_height, offset_x, offset_y, get_py_y_value
+from src.util import GROUND, BLOCK, FIRST_KIND, SECOND_KIND, THIRD_KIND
+from src.foundation import PieceFactory, Selection
+from src.environment import Field, Canvas
 
 
 class PuzzleFactory:
@@ -139,10 +139,10 @@ class PlayState(State):
         if self._end_event:
             self.end_event()
 
+        self._selection.update(dt)
+
         if self._field.check_vertical_lines():
             self._end_event = True
-
-        self._selection.update(dt)
 
     def on_key_press(self, symbol):
         if symbol == key.RIGHT:
