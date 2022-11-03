@@ -1,9 +1,6 @@
 from pyglet.window import key
-from pyglet.text import Label
 from puzzle_objects import PieceFactory, Selection
-from util import GROUND_TILE, BLOCK_TILE
-from util import GROUND, RED_SIGN, GREEN_SIGN, BLUE_SIGN, BLOCK, BLOCK_RED, BLOCK_GREEN, BLOCK_BLUE
-from util import KIND_1, KIND_2, KIND_3
+from util import GROUND, BLOCK, FIRST_KIND, SECOND_KIND, THIRD_KIND
 from util import get_py_y_value, offset_x, offset_y
 from field import Field, Canvas
 
@@ -16,43 +13,41 @@ class PuzzleFactory:
 
     def create_pieces(self) -> list:
         pieces = []
-        for i in range(self._field_size):
-            for j in range(self._field_size):
-                kind = self._field.get_tile_kind(j, i)
+        for i in range(1, self._field_size - 1):
+            for j in range(1, self._field_size - 1):
+                kind = self._field.get_tile(j, i)
 
-                if kind not in [KIND_1, KIND_2, KIND_3]:
+                if kind not in [FIRST_KIND, SECOND_KIND, THIRD_KIND]:
                     continue
 
                 pieces.append(
-                    PieceFactory.new_instance(self._field.get_tile_kind(j, i), j, i, self._field, self._canvas))
+                    PieceFactory.new_instance(self._field.get_tile(j, i), j, i, self._field, self._canvas))
 
         return pieces
 
     def build_environment(self):
-        for i in range(self._field_size):
-            for j in range(self._field_size):
-                x, y = offset_x + j * 64, get_py_y_value(offset_y + i * 64)
-                kind = self._field.get_tile_kind(j, i)
+        for i in range(1, self._field_size - 1):
+            for j in range(1, self._field_size - 1):
+                x = offset_x + j * 64
+                y = get_py_y_value(offset_y + i * 64)
+                self._canvas.get_sprite(GROUND[self._field.get_background_tile(j, i)], background=True, x=x, y=y)
 
-                self._canvas.get_sprite(GROUND_TILE, background=True, x=x, y=y)
+                if self._field.get_tile(j, i) == 10:
+                    self._canvas.get_sprite(BLOCK, x=x, y=y)
 
-                if kind == BLOCK:
-                    self._canvas.get_sprite(BLOCK_TILE, x=x, y=y)
-                elif kind == RED_SIGN:
-                    self._canvas.get_sprite(BLOCK_RED, x=x, y=y)
-                elif kind == GREEN_SIGN:
-                    self._canvas.get_sprite(BLOCK_GREEN, x=x, y=y)
-                elif kind == BLUE_SIGN:
-                    self._canvas.get_sprite(BLOCK_BLUE, x=x, y=y)
+        for i in range(1, self._field_size - 1):
+            x = offset_x + i * 64
+            y = get_py_y_value(offset_y)
+            self._canvas.get_sprite(GROUND[self._field.get_background_tile(i, 0)], background=True, x=x, y=y)
 
 
 class Puzzle:
     def __init__(self):
-        self._field = Field({'kind1': KIND_1, 'kind2': KIND_2, 'kind3': KIND_3})
+        self._field = Field({'first_line': FIRST_KIND, 'second_line': SECOND_KIND, 'third': THIRD_KIND})
         self._canvas = Canvas()
         self._factory = PuzzleFactory(self._field, self._canvas)
-        self._factory.build_environment()
         self._pieces = self._factory.create_pieces()
+        self._factory.build_environment()
         self._selection = Selection(1, 4, self._canvas)
 
     def update(self, dt):

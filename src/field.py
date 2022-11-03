@@ -1,12 +1,23 @@
 from pyglet.graphics import Batch, OrderedGroup
 from pyglet.sprite import Sprite
 from pyglet.image import ImageData
+from util import BLOCKED
 
 
 class Field:
     def __init__(self, scheme: dict):
+        self._background = [
+            [0, 4, 7, 5, 7, 6, 7, 0],
+            [0, 1, 2, 2, 2, 2, 2, 0],
+            [0, 3, 0, 0, 0, 0, 0, 0],
+            [0, 3, 0, 0, 0, 0, 0, 0],
+            [0, 3, 0, 0, 0, 0, 0, 0],
+            [0, 3, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]
+        ]
+
         self._matrix = [
-            [10, 11, 10, 12, 10, 13, 10],
+            [10, 10, 10, 10, 10, 10, 10],
             [10, 21, 10, 22, 10, 23, 10],
             [10, 21, 21, 22, 22, 23, 10],
             [10, 0, 10, 22, 10, 23, 10],
@@ -18,24 +29,24 @@ class Field:
         self._scheme = scheme
 
     def check_vertical_lines(self):
-        kind_1_line, kind_2_line, kind_3_line = True, True, True
+        first_line, second_line, third_line = True, True, True
 
         for i in range(1, 6):
-            if self._matrix[i][1] != self._scheme['kind1']:
-                kind_1_line = False
+            if self._matrix[i][1] != self._scheme['first_line']:
+                first_line = False
                 break
 
         for i in range(1, 6):
-            if self._matrix[i][3] != self._scheme['kind2']:
-                kind_2_line = False
+            if self._matrix[i][3] != self._scheme['second_line']:
+                second_line = False
                 break
 
         for i in range(1, 6):
-            if self._matrix[i][5] != self._scheme['kind3']:
-                kind_3_line = False
+            if self._matrix[i][5] != self._scheme['third_line']:
+                third_line = False
                 break
 
-        return kind_1_line and kind_2_line and kind_3_line
+        return first_line and second_line and third_line
 
     def get_size(self):
         return len(self._matrix)
@@ -47,10 +58,13 @@ class Field:
         self._matrix[row][col] = tile
 
     def is_blocked(self, col: int, row: int):
-        return self._matrix[row][col] // 10 == 1 or self._matrix[row][col] // 10 == 2
+        return (self._matrix[row][col] // 10) in BLOCKED
 
-    def get_tile_kind(self, col: int, row: int):
+    def get_tile(self, col: int, row: int):
         return self._matrix[row][col]
+
+    def get_background_tile(self, col: int, row: int):
+        return self._background[row][col]
 
 
 class Canvas:

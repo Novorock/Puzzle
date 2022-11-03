@@ -29,11 +29,11 @@ def load_sprite(path: str, rescale=False):
     return sprite
 
 
-GROUND_TILE = resource.image('ground_06.png')
-BLOCK_TILE = resource.image('block.png')
-BLOCK_RED = resource.image('block_red_signature.png')
-BLOCK_GREEN = resource.image('block_green_signature.png')
-BLOCK_BLUE = resource.image('block_blue_signature.png')
+GROUND = []
+for i in range(8):
+    GROUND.append(resource.image('ground_0%s.png' % i))
+
+BLOCK = resource.image('block_01.png')
 RED_PIECE = resource.image('pieces/red_piece.png')
 GREEN_PIECE = resource.image('pieces/green_piece.png')
 BLUE_PIECE = resource.image('pieces/blue_piece.png')
@@ -43,8 +43,8 @@ GREEN_PIECE_SELECTED = resource.image('pieces/green_piece_selected.png')
 BLUE_PIECE_SELECTED = resource.image('pieces/blue_piece_selected.png')
 
 MOVEMENT_SPEED = 150
-GROUND, BLOCK, RED_SIGN, GREEN_SIGN, BLUE_SIGN = 0, 10, 11, 12, 13
-KIND_1, KIND_2, KIND_3 = 21, 22, 23
+BLOCKED = [1, 2]
+EMPTY, FIRST_KIND, SECOND_KIND, THIRD_KIND = 0, 21, 22, 23
 
 
 def get_py_y_value(my_y_value):

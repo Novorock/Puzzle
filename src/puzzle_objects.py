@@ -2,7 +2,7 @@ from pyglet.image import ImageData
 from util import get_py_y_value, offset_x, offset_y
 from util import MOVEMENT_SPEED, RED_PIECE, GREEN_PIECE
 from util import BLUE_PIECE, RED_PIECE_SELECTED, BLUE_PIECE_SELECTED, GREEN_PIECE_SELECTED, SELECTION
-from util import GROUND, KIND_1, KIND_2, KIND_3
+from util import EMPTY, FIRST_KIND, SECOND_KIND, THIRD_KIND
 from field import Field, Canvas
 
 
@@ -72,25 +72,25 @@ class Piece(MovementAnimation):
     def move_down(self):
         if not self._field.is_blocked(self._col, self._row + 1) and not self._is_moving:
             super(Piece, self).move_down()
-            self._field.update_field(self._col, self._row - 1, GROUND)
+            self._field.update_field(self._col, self._row - 1, EMPTY)
             self._field.update_field(self._col, self._row, self._kind)
 
     def move_up(self):
         if not self._field.is_blocked(self._col, self._row - 1) and not self._is_moving:
             super(Piece, self).move_up()
-            self._field.update_field(self._col, self._row + 1, GROUND)
+            self._field.update_field(self._col, self._row + 1, EMPTY)
             self._field.update_field(self._col, self._row, self._kind)
 
     def move_right(self):
         if not self._field.is_blocked(self._col + 1, self._row) and not self._is_moving:
             super(Piece, self).move_right()
-            self._field.update_field(self._col - 1, self._row, GROUND)
+            self._field.update_field(self._col - 1, self._row, EMPTY)
             self._field.update_field(self._col, self._row, self._kind)
 
     def move_left(self):
         if not self._field.is_blocked(self._col - 1, self._row) and not self._is_moving:
             super(Piece, self).move_left()
-            self._field.update_field(self._col + 1, self._row, GROUND)
+            self._field.update_field(self._col + 1, self._row, EMPTY)
             self._field.update_field(self._col, self._row, self._kind)
 
     def update(self, dt):
@@ -116,18 +116,18 @@ def __str__(self):
 
 
 class RedPiece(Piece):
-    def __init__(self, canvas: Canvas, col, row, field):
-        super().__init__(RED_PIECE, RED_PIECE_SELECTED, canvas, KIND_1, col, row, field)
+    def __init__(self, kind, canvas: Canvas, col, row, field):
+        super().__init__(RED_PIECE, RED_PIECE_SELECTED, canvas, kind, col, row, field)
 
 
 class GreenPiece(Piece):
-    def __init__(self, canvas: Canvas, col, row, field):
-        super().__init__(GREEN_PIECE, GREEN_PIECE_SELECTED, canvas, KIND_1, col, row, field)
+    def __init__(self, kind, canvas: Canvas, col, row, field):
+        super().__init__(GREEN_PIECE, GREEN_PIECE_SELECTED, canvas, kind, col, row, field)
 
 
 class BluePiece(Piece):
-    def __init__(self, canvas: Canvas, col, row, field):
-        super().__init__(BLUE_PIECE, BLUE_PIECE_SELECTED, canvas, KIND_1, col, row, field)
+    def __init__(self, kind, canvas: Canvas, col, row, field):
+        super().__init__(BLUE_PIECE, BLUE_PIECE_SELECTED, canvas, kind, col, row, field)
 
 
 class PieceFactory:
@@ -136,12 +136,12 @@ class PieceFactory:
 
     @staticmethod
     def new_instance(kind, col, row, field: Field, canvas: Canvas):
-        if kind == KIND_1:
-            return RedPiece(canvas, col, row, field)
-        elif kind == KIND_2:
-            return GreenPiece(canvas, col, row, field)
-        elif kind == KIND_3:
-            return BluePiece(canvas, col, row, field)
+        if kind == FIRST_KIND:
+            return RedPiece(FIRST_KIND, canvas, col, row, field)
+        elif kind == SECOND_KIND:
+            return GreenPiece(SECOND_KIND, canvas, col, row, field)
+        elif kind == THIRD_KIND:
+            return BluePiece(THIRD_KIND, canvas, col, row, field)
         else:
             raise AttributeError("Invalid kind of piece")
 
