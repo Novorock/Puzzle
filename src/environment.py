@@ -7,7 +7,7 @@ from util import BLOCKED
 class Field:
     def __init__(self, scheme: dict):
         self._background = [
-            [0, 4, 7, 5, 7, 6, 7, 0],
+            [0, 4, 7, 5, 7, 6, 0, 0],
             [0, 1, 2, 2, 2, 2, 2, 0],
             [0, 3, 0, 0, 0, 0, 0, 0],
             [0, 3, 0, 0, 0, 0, 0, 0],
@@ -73,6 +73,7 @@ class Canvas:
         self._batch = Batch()
         self._background = OrderedGroup(0)
         self._foreground = OrderedGroup(1)
+        self._curtain = OrderedGroup(2)
 
     def get_sprite(self, img: ImageData, *, x=0, y=0, background=False):
         if background:
@@ -85,8 +86,22 @@ class Canvas:
         return sprite
 
     def delete_sprite(self, sprite: Sprite):
-        sprite.delete()
-        self._drawable_objects.remove(sprite)
+        if sprite is not None:
+            sprite.delete()
+            self._drawable_objects.remove(sprite)
+
+    def get_batch(self):
+        return self._batch
+
+    def get_curtain(self):
+        return self._curtain
+
+    def delete_drawable(self, objects):
+        for drawable in objects:
+            self._drawable_objects.remove(drawable)
+
+    def track(self, drawable):
+        self._drawable_objects.append(drawable)
 
     def draw(self):
         self._batch.draw()

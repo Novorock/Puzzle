@@ -1,12 +1,16 @@
 from pyglet.image import ImageData
 from pyglet.sprite import Sprite
 from pyglet import resource
+from pyglet import font
 
 window_width, window_height = 576, 576
 offset_x, offset_y = 64, 64
 
 resource.path = ['../assets']
 resource.reindex()
+
+resource.add_font('ARCADECLASSIC.TTF')
+classic = font.load('Classic')
 
 
 def set_center(img: ImageData):
