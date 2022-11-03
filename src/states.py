@@ -1,6 +1,5 @@
 from pyglet.shapes import Rectangle
 from pyglet.window import key
-from pyglet.text import Label
 from util import window_width, window_height, offset_x, offset_y, get_py_y_value
 from util import GROUND, BLOCK, FIRST_KIND, SECOND_KIND, THIRD_KIND
 from foundation import PieceFactory, Selection
@@ -57,7 +56,7 @@ class GameStateManager:
         elif state == self.play_state:
             self._current_state = PlayState(self, self._canvas)
         elif state == self.end_state:
-            self._current_state = None
+            self._current_state = EndState(self, self._canvas)
 
     def on_key_press(self, symbol):
         self._current_state.on_key_press(symbol)
@@ -87,18 +86,10 @@ class IntroState(State):
         self._background = Rectangle(0, 0, width=window_width, height=window_height, batch=canvas.get_batch(),
                                      color=(0, 0, 0))
         canvas.track(self._background)
-        self._help_label = Label('Hello, world',
-                                 batch=canvas.get_batch(),
-                                 font_name='',
-                                 font_size=36,
-                                 x=window_width // 2, y=window_height // 2,
-                                 anchor_x='center', anchor_y='center')
 
     def on_key_press(self, symbol):
         if symbol == key.ENTER:
             self._gsm.set_state(self._gsm.play_state)
-            self._help_label.delete()
-            del self._help_label
             self._background.delete()
             del self._background
 
@@ -107,7 +98,7 @@ class PlayState(State):
     def __init__(self, gsm: GameStateManager, canvas: Canvas):
         super().__init__(gsm, canvas)
         self._event_tick = 0
-        self._start_event = True
+        self._start_event, self._end_event = True, False
         self._rectangles = []
 
         for i in range(9):
@@ -116,7 +107,7 @@ class PlayState(State):
                           group=canvas.get_curtain(), color=(0, 0, 0)))
             canvas.track(self._rectangles[-1])
 
-        self._field = Field({'first_line': FIRST_KIND, 'second_line': SECOND_KIND, 'third': THIRD_KIND})
+        self._field = Field({'first_line': FIRST_KIND, 'second_line': SECOND_KIND, 'third_line': THIRD_KIND})
         self._factory = PuzzleFactory(self._field, self._canvas)
         self._pieces = self._factory.create_pieces()
         self._factory.build_environment()
@@ -125,6 +116,12 @@ class PlayState(State):
     def update(self, dt):
         if self._start_event:
             self.start_event()
+
+        if self._end_event:
+            self.end_event()
+
+        if self._field.check_vertical_lines():
+            self._end_event = True
 
         self._selection.update(dt)
 
@@ -148,8 +145,6 @@ class PlayState(State):
                     self._selection.select(result[0])
 
     def start_event(self):
-        self._event_tick += 1
-
         for i in range(0, 9, 2):
             self._rectangles[i].x -= 12
 
@@ -158,5 +153,26 @@ class PlayState(State):
 
         if self._rectangles[0].x < -window_width:
             self._start_event = False
-            self._canvas.delete_drawable(self._rectangles)
-            self._rectangles.clear()
+
+    def end_event(self):
+        if self._event_tick > 60:
+            for i in range(0, 9, 2):
+                self._rectangles[i].x += 12
+
+            for i in range(1, 9, 2):
+                self._rectangles[i].x -= 12
+
+            if self._rectangles[0].x > 0:
+                self._end_event = False
+
+            if self._rectangles[0].x > 0:
+                self._gsm.set_state(self._gsm.end_state)
+        else:
+            self._event_tick += 1
+
+
+class EndState(State):
+    def __init__(self, gsm: GameStateManager, canvas: Canvas):
+        super().__init__(gsm, canvas)
+        self._background = Rectangle(0, 0, width=window_width, height=window_height, batch=canvas.get_batch(),
+                                     color=(0, 0, 0))
