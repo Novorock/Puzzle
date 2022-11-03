@@ -1,5 +1,6 @@
 from pyglet.shapes import Rectangle
 from pyglet.window import key
+from pyglet.text import Label
 from util import window_width, window_height, offset_x, offset_y, get_py_y_value
 from util import GROUND, BLOCK, FIRST_KIND, SECOND_KIND, THIRD_KIND
 from foundation import PieceFactory, Selection
@@ -83,15 +84,33 @@ class State:
 class IntroState(State):
     def __init__(self, gsm: GameStateManager, canvas: Canvas):
         super().__init__(gsm, canvas)
+        self._title = Label(text='PUZZLE', font_name='Small Pixel', font_size=30,
+                            x=window_width // 2, y=window_height // 2 + 64,
+                            anchor_x='center', anchor_y='center',
+                            batch=canvas.get_batch(), group=canvas.get_text_layout())
+        self._movement_info_1 = Label(text='<Arrows> to move', font_name='Small Pixel', font_size=16,
+                                      x=window_width // 2, y=window_height // 2,
+                                      anchor_x='center', anchor_y='center',
+                                      batch=canvas.get_batch(), group=canvas.get_text_layout())
+        self._movement_info_2 = Label(text='<Enter> to select piece', font_name='Small Pixel', font_size=16,
+                                      x=window_width // 2, y=window_height // 2 - 32,
+                                      anchor_x='center', anchor_y='center',
+                                      batch=canvas.get_batch(), group=canvas.get_text_layout())
         self._background = Rectangle(0, 0, width=window_width, height=window_height, batch=canvas.get_batch(),
-                                     color=(0, 0, 0))
+                                     group=canvas.get_curtain(), color=(0, 0, 0))
+        canvas.track(self._title)
+        canvas.track(self._movement_info_1)
+        canvas.track(self._movement_info_2)
         canvas.track(self._background)
 
     def on_key_press(self, symbol):
         if symbol == key.ENTER:
             self._gsm.set_state(self._gsm.play_state)
             self._background.delete()
-            del self._background
+            self._title.delete()
+            self._movement_info_1.delete()
+            self._movement_info_2.delete()
+            self._canvas.delete_drawable([self._movement_info_1, self._movement_info_2, self._title])
 
 
 class PlayState(State):
@@ -175,4 +194,8 @@ class EndState(State):
     def __init__(self, gsm: GameStateManager, canvas: Canvas):
         super().__init__(gsm, canvas)
         self._background = Rectangle(0, 0, width=window_width, height=window_height, batch=canvas.get_batch(),
-                                     color=(0, 0, 0))
+                                     group=canvas.get_curtain(), color=(0, 0, 0))
+        self._title = Label(text='THE END', font_name='Small Pixel', font_size=30,
+                            x=window_width // 2, y=window_height // 2 + 64,
+                            anchor_x='center', anchor_y='center',
+                            batch=canvas.get_batch(), group=canvas.get_text_layout())

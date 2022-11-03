@@ -74,6 +74,7 @@ class Canvas:
         self._background = OrderedGroup(0)
         self._foreground = OrderedGroup(1)
         self._curtain = OrderedGroup(2)
+        self._text_layout = OrderedGroup(3)
 
     def get_sprite(self, img: ImageData, *, x=0, y=0, background=False):
         if background:
@@ -95,6 +96,9 @@ class Canvas:
 
     def get_curtain(self):
         return self._curtain
+
+    def get_text_layout(self):
+        return self._text_layout
 
     def delete_drawable(self, objects):
         for drawable in objects:
