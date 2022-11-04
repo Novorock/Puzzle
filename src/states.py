@@ -88,29 +88,55 @@ class IntroState(State):
                             x=window_width // 2, y=window_height // 2 + 64,
                             anchor_x='center', anchor_y='center',
                             batch=canvas.get_batch(), group=canvas.get_text_layout())
-        self._movement_info_1 = Label(text='<Arrows> to move', font_name='Small Pixel', font_size=16,
+        self._movement_info_1 = Label(text='<ENTER> or <SPACE> to select pieces', font_name='Small Pixel', font_size=16,
                                       x=window_width // 2, y=window_height // 2,
                                       anchor_x='center', anchor_y='center',
                                       batch=canvas.get_batch(), group=canvas.get_text_layout())
-        self._movement_info_2 = Label(text='<Enter> to select piece', font_name='Small Pixel', font_size=16,
+        self._movement_info_2 = Label(text='<ARROWS> to move piece', font_name='Small Pixel', font_size=16,
                                       x=window_width // 2, y=window_height // 2 - 32,
                                       anchor_x='center', anchor_y='center',
                                       batch=canvas.get_batch(), group=canvas.get_text_layout())
+        self._continue_info = Label(text='Press <ENTER> to continue', font_name='Small Pixel', font_size=16,
+                                    x=window_width // 2, y=window_height // 2 - 128,
+                                    anchor_x='center', anchor_y='center',
+                                    batch=canvas.get_batch(), group=canvas.get_text_layout())
         self._background = Rectangle(0, 0, width=window_width, height=window_height, batch=canvas.get_batch(),
                                      group=canvas.get_curtain(), color=(0, 0, 0))
         canvas.track(self._title)
         canvas.track(self._movement_info_1)
         canvas.track(self._movement_info_2)
+        canvas.track(self._continue_info)
         canvas.track(self._background)
+
+        self._ticks = 0
+        self._forward_animation = True
+
+    def update(self, dt):
+        if self._continue_info is None:
+            return
+
+        if self._forward_animation:
+            self._ticks += 1
+        else:
+            self._ticks -= 1
+
+        self._continue_info.color = (255, 255, 255, 255 - 255 * self._ticks // 80)
+
+        if self._ticks == 80:
+            self._forward_animation = False
+        elif self._ticks == 0:
+            self._forward_animation = True
 
     def on_key_press(self, symbol):
         if symbol == key.ENTER:
             self._gsm.set_state(self._gsm.play_state)
+            self._canvas.delete_drawable(
+                [self._movement_info_1, self._movement_info_2, self._title, self._continue_info])
             self._background.delete()
             self._title.delete()
             self._movement_info_1.delete()
             self._movement_info_2.delete()
-            self._canvas.delete_drawable([self._movement_info_1, self._movement_info_2, self._title])
+            self._continue_info.delete()
 
 
 class PlayState(State):
@@ -154,7 +180,7 @@ class PlayState(State):
         elif symbol == key.UP:
             self._selection.move_up()
 
-        if symbol == key.ENTER:
+        if symbol == key.SPACE or symbol == key.ENTER:
             if self._selection.is_active() and not self._selection.is_moving():
                 self._selection.drop()
             else:
