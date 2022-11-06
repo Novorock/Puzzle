@@ -46,7 +46,7 @@ GROUND = []
 for i in range(8):
     GROUND.append(load(working_dir + 'ground_0%s.png' % i))
 
-BLOCK = load(working_dir + 'block_02.png')
+BLOCK = load(working_dir + 'block_03.png')
 RED_PIECE = load(working_dir + 'pieces/red_piece.png')
 GREEN_PIECE = load(working_dir + 'pieces/green_piece.png')
 BLUE_PIECE = load(working_dir + 'pieces/blue_piece.png')
