@@ -55,7 +55,7 @@ RED_PIECE_SELECTED = load(working_dir + 'pieces/red_piece_selected.png')
 GREEN_PIECE_SELECTED = load(working_dir + 'pieces/green_piece_selected.png')
 BLUE_PIECE_SELECTED = load(working_dir + 'pieces/blue_piece_selected.png')
 
-MOVEMENT_SPEED = 210
+ANIMATION_RATE = 220
 BLOCKED = [1, 2]
 EMPTY, FIRST_KIND, SECOND_KIND, THIRD_KIND = 0, 21, 22, 23
 

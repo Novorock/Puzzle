@@ -23,7 +23,7 @@ class PuzzleFactory:
                     continue
 
                 pieces.append(
-                    PieceFactory.new_instance(self._field.get_tile(j, i), j, i, self._field, self._canvas))
+                    PieceFactory.new_instance(self._field, self._field.get_tile(j, i), j, i, self._canvas))
 
         return pieces
 
@@ -62,6 +62,9 @@ class GameStateManager:
     def on_key_press(self, symbol):
         self._current_state.on_key_press(symbol)
 
+    def on_key_release(self, symbol):
+        self._current_state.on_key_release(symbol)
+
     def update(self, dt):
         self._current_state.update(dt)
 
@@ -73,12 +76,19 @@ class State:
     def __init__(self, gsm: GameStateManager, canvas: Canvas):
         self._canvas = canvas
         self._gsm = gsm
+        self._keys = {key.SPACE: False, key.UP: False, key.DOWN: False, key.RIGHT: False, key.LEFT: False}
 
     def update(self, dt):
         pass
 
     def on_key_press(self, symbol):
-        pass
+        self._keys[symbol] = True
+
+    def on_key_release(self, symbol):
+        if symbol not in self._keys:
+            return
+
+        self._keys[symbol] = False
 
 
 class IntroState(State):
@@ -167,25 +177,30 @@ class PlayState(State):
 
         self._selection.update(dt)
 
-        if self._field.check_vertical_lines():
+        if self._field.check_vertical_lines() and not self._selection.is_active():
             self._end_event = True
 
-    def on_key_press(self, symbol):
-        if symbol == key.RIGHT:
-            self._selection.move_right()
-        elif symbol == key.LEFT:
+        if self._keys[key.LEFT]:
             self._selection.move_left()
-        elif symbol == key.DOWN:
-            self._selection.move_down()
-        elif symbol == key.UP:
+        elif self._keys[key.RIGHT]:
+            self._selection.move_right()
+        elif self._keys[key.UP]:
             self._selection.move_up()
+        elif self._keys[key.DOWN]:
+            self._selection.move_down()
+
+        super().update(dt)
+
+    def on_key_press(self, symbol):
+        super().on_key_press(symbol)
 
         if symbol == key.SPACE or symbol == key.ENTER:
             if self._selection.is_active() and not self._selection.is_moving():
                 self._selection.drop()
-            else:
+            elif not self._selection.is_moving():
                 col, row = self._selection.get_col(), self._selection.get_row()
                 result = list(filter(lambda piece: piece.get_col() == col and piece.get_row() == row, self._pieces))
+
                 if len(result) > 0:
                     self._selection.select(result[0])
 
@@ -200,7 +215,7 @@ class PlayState(State):
             self._start_event = False
 
     def end_event(self):
-        if self._event_tick > 60:
+        if self._event_tick > 20:
             for i in range(0, 9, 2):
                 self._rectangles[i].x += 12
 
